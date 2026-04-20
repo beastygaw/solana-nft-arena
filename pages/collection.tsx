@@ -18,6 +18,10 @@ export default function Collection() {
     return 'Common';
   };
 
+  const explorerLink = (tx: string) => {
+    return 'https://explorer.solana.com/tx/' + tx + '?cluster=devnet';
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <nav className="flex justify-between items-center px-8 py-4 border-b border-purple-900">
@@ -68,15 +72,15 @@ export default function Collection() {
                   <p className="text-gray-500 text-xs">DEF</p>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 truncate mb-1">PDA: {card.pda}</p>
-              
-                href={"https://explorer.solana.com/tx/" + card.tx + "?cluster=devnet"}
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs text-purple-400 hover:underline"
+              <p className="text-xs text-gray-500 truncate mb-1">
+                {card.pda}
+              </p>
+              <button
+                onClick={() => window.open(explorerLink(card.tx), '_blank')}
+                className="text-xs text-purple-400 hover:underline bg-transparent border-0 cursor-pointer p-0"
               >
                 View on Explorer
-              </a>
+              </button>
             </div>
           ))}
         </div>
