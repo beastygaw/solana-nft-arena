@@ -1,0 +1,65 @@
+{
+  "version": "0.1.0",
+  "name": "nft_card_game",
+  "instructions": [
+    {
+      "name": "mintCard",
+      "accounts": [
+        { "name": "cardAccount", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": true, "isSigner": true },
+        { "name": "tokenAccount", "isMut": true, "isSigner": false },
+        { "name": "player", "isMut": true, "isSigner": true },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false },
+        { "name": "rent", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "name", "type": "string" },
+        { "name": "attack", "type": "u8" },
+        { "name": "defense", "type": "u8" },
+        { "name": "rarity", "type": "u8" },
+        { "name": "uri", "type": "string" }
+      ]
+    },
+    {
+      "name": "battle",
+      "accounts": [
+        { "name": "playerCard", "isMut": true, "isSigner": false },
+        { "name": "opponentCard", "isMut": true, "isSigner": false },
+        { "name": "player", "isMut": false, "isSigner": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "getCardStats",
+      "accounts": [
+        { "name": "cardAccount", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "CardAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "owner", "type": "publicKey" },
+          { "name": "mint", "type": "publicKey" },
+          { "name": "name", "type": "string" },
+          { "name": "attack", "type": "u8" },
+          { "name": "defense", "type": "u8" },
+          { "name": "rarity", "type": "u8" },
+          { "name": "wins", "type": "u32" },
+          { "name": "losses", "type": "u32" },
+          { "name": "uri", "type": "string" }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    { "code": 6000, "name": "NotCardOwner", "msg": "You are not the owner of this card" },
+    { "code": 6001, "name": "InvalidRarity", "msg": "Invalid card rarity" }
+  ]
+}
