@@ -12,12 +12,16 @@ export default function Collection() {
     setCards(saved);
   }, []);
 
-  const rarityLabel = (r: number) => r === 3 ? '🟡 Legendary' : r === 2 ? '🔵 Rare' : '⚪ Common';
+  const rarityLabel = (r: number) => {
+    if (r === 3) return 'Legendary';
+    if (r === 2) return 'Rare';
+    return 'Common';
+  };
 
   return (
     <div className="min-h-screen bg-black text-white">
       <nav className="flex justify-between items-center px-8 py-4 border-b border-purple-900">
-        <Link href="/" className="text-2xl font-bold text-purple-400">⚔️ NFT Arena</Link>
+        <Link href="/" className="text-2xl font-bold text-purple-400">NFT Arena</Link>
         <div className="flex gap-6 items-center">
           <Link href="/mint" className="hover:text-purple-400">Mint</Link>
           <Link href="/collection" className="text-purple-400">Collection</Link>
@@ -27,7 +31,7 @@ export default function Collection() {
       </nav>
 
       <div className="max-w-6xl mx-auto px-8 py-12">
-        <h2 className="text-4xl font-bold mb-2">🃏 My Collection</h2>
+        <h2 className="text-4xl font-bold mb-2">My Collection</h2>
         <p className="text-gray-400 mb-8">Your minted NFT cards on Solana devnet</p>
 
         {!connected && (
@@ -39,7 +43,6 @@ export default function Collection() {
 
         {connected && cards.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-6xl mb-4">🎴</p>
             <p className="text-xl text-gray-400 mb-6">No cards yet! Go mint some.</p>
             <Link href="/mint">
               <button className="bg-purple-600 hover:bg-purple-700 px-8 py-3 rounded-lg font-bold">
@@ -65,14 +68,14 @@ export default function Collection() {
                   <p className="text-gray-500 text-xs">DEF</p>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 truncate">PDA: {card.pda}</p>
+              <p className="text-xs text-gray-500 truncate mb-1">PDA: {card.pda}</p>
               
-                href={`https://explorer.solana.com/tx/${card.tx}?cluster=devnet`}
+                href={"https://explorer.solana.com/tx/" + card.tx + "?cluster=devnet"}
                 target="_blank"
                 rel="noreferrer"
                 className="text-xs text-purple-400 hover:underline"
               >
-                View on Explorer ↗
+                View on Explorer
               </a>
             </div>
           ))}
