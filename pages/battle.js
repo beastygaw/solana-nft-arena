@@ -1,155 +1,132 @@
-import { useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { Program, AnchorProvider, web3 } from '@coral-xyz/anchor';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react'
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { Program, AnchorProvider, web3 } from '@coral-xyz/anchor'
+import Link from 'next/link'
+import { useState, useEffect } from 'react'
 
-const PROGRAM_ID = new web3.PublicKey('2UKxt5rLyEcDP1TjoXnt78o97D13Xqc9oxqnEu4eBrCs');
+const PROGRAM_ID = new web3.PublicKey('2UKxt5rLyEcDP1TjoXnt78o97D13Xqc9oxqnEu4eBrCs')
+
+const OPPONENTS = [
+  { name: 'Dark Knight', attack: 80, defense: 70, emoji: '🗡️' },
+  { name: 'Sea Serpent', attack: 90, defense: 55, emoji: '🐍' },
+  { name: 'Thunder God', attack: 95, defense: 65, emoji: '⚡' },
+]
 
 export default function Battle() {
-  const { connection } = useConnection();
-  const wallet = useWallet();
-  const [cards, setCards] = useState<any[]>([]);
-  const [selectedCard, setSelectedCard] = useState<any>(null);
-  const [battling, setBattling] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
+  const { connection } = useConnection()
+  const wallet = useWallet()
+  const [cards, setCards] = useState([])
+  const [selected, setSelected] = useState(null)
+  const [battling, setBattling] = useState(false)
+  const [result, setResult] = useState(null)
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('myCards') || '[]');
-    setCards(saved);
-  }, []);
+    const saved = JSON.parse(localStorage.getItem('myCards') || '[]')
+    setCards(saved)
+  }, [])
 
-  const battle = async (opponent: any) => {
-    if (!selectedCard || !wallet.publicKey) return;
-    setBattling(true);
-    setResult(null);
-
+  const battle = async (opponent) => {
+    if (!selected) return
+    setBattling(true)
+    setResult(null)
     try {
-      const provider = new AnchorProvider(connection, wallet as any, { commitment: 'confirmed' });
-      const idl = await fetch('/idl.json').then(r => r.json());
-      const program = new Program(idl, PROGRAM_ID, provider);
-
+      const provider = new AnchorProvider(connection, wallet, { commitment: 'confirmed' })
+      const idl = await fetch('/idl.json').then(r => r.json())
+      const program = new Program(idl, PROGRAM_ID, provider)
       const [playerCardPDA] = web3.PublicKey.findProgramAddressSync(
-        [Buffer.from('card'), wallet.publicKey.toBuffer(), Buffer.from(selectedCard.name)],
+        [Buffer.from('card'), wallet.publicKey.toBuffer(), Buffer.from(selected.name)],
         PROGRAM_ID
-      );
+      )
       const [opponentCardPDA] = web3.PublicKey.findProgramAddressSync(
         [Buffer.from('card'), wallet.publicKey.toBuffer(), Buffer.from(opponent.name)],
         PROGRAM_ID
-      );
-
-      const tx = await program.methods
-        .battle()
-        .accounts({
-          playerCard: playerCardPDA,
-          opponentCard: opponentCardPDA,
-          player: wallet.publicKey,
-        })
-        .rpc();
-
-      const playerPower = selectedCard.attack + selectedCard.defense;
-      const opponentPower = opponent.attack + opponent.defense;
-      const winner = playerPower >= opponentPower ? selectedCard.name : opponent.name;
-      setResult(`🏆 ${winner} wins! TX: ${tx.slice(0, 20)}...`);
-
-    } catch (err: any) {
-      // Simulate battle if on-chain fails
-      const playerPower = selectedCard.attack + selectedCard.defense;
-      const opponentPower = opponent.attack + opponent.defense;
-      const winner = playerPower >= opponentPower ? selectedCard.name : opponent.name;
-      setResult(`🏆 ${winner} wins the battle!`);
-    } finally {
-      setBattling(false);
+      )
+      await program.methods.battle()
+        .accounts({ playerCard: playerCardPDA, opponentCard: opponentCardPDA, player: wallet.publicKey })
+        .rpc()
+    } catch (err) {
+      console.log('On-chain battle failed, using local resolution')
     }
-  };
-
-  const OPPONENTS = [
-    { name: 'Dark Knight', attack: 80, defense: 70, emoji: '🗡️', rarity: 2 },
-    { name: 'Sea Serpent', attack: 90, defense: 55, emoji: '🐍', rarity: 3 },
-    { name: 'Thunder God', attack: 95, defense: 65, emoji: '⚡', rarity: 3 },
-  ];
+    const playerPower = selected.attack + selected.defense
+    const opponentPower = opponent.attack + opponent.defense
+    const winner = playerPower >= opponentPower ? selected.name : opponent.name
+    setResult('🏆 ' + winner + ' wins the battle!')
+    setBattling(false)
+  }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <nav className="flex justify-between items-center px-8 py-4 border-b border-purple-900">
-        <Link href="/" className="text-2xl font-bold text-purple-400">⚔️ NFT Arena</Link>
-        <div className="flex gap-6 items-center">
-          <Link href="/mint" className="hover:text-purple-400">Mint</Link>
-          <Link href="/collection" className="hover:text-purple-400">Collection</Link>
-          <Link href="/battle" className="text-purple-400">Battle</Link>
+    <div style={{minHeight:'100vh',background:'#000',color:'#fff',fontFamily:'sans-serif'}}>
+      <nav style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'16px 32px',borderBottom:'1px solid #4a1d96'}}>
+        <Link href="/" style={{color:'#a855f7',fontSize:'24px',fontWeight:'bold',textDecoration:'none'}}>NFT Arena</Link>
+        <div style={{display:'flex',gap:'24px',alignItems:'center'}}>
+          <Link href="/mint" style={{color:'#fff',textDecoration:'none'}}>Mint</Link>
+          <Link href="/collection" style={{color:'#fff',textDecoration:'none'}}>Collection</Link>
+          <Link href="/battle" style={{color:'#a855f7',textDecoration:'none'}}>Battle</Link>
           <WalletMultiButton />
         </div>
       </nav>
 
-      <div className="max-w-6xl mx-auto px-8 py-12">
-        <h2 className="text-4xl font-bold mb-2">⚔️ Battle Arena</h2>
-        <p className="text-gray-400 mb-8">Select your card and challenge an opponent</p>
+      <div style={{maxWidth:'1200px',margin:'0 auto',padding:'48px 32px'}}>
+        <h2 style={{fontSize:'36px',fontWeight:'bold',marginBottom:'8px'}}>Battle Arena</h2>
+        <p style={{color:'#9ca3af',marginBottom:'32px'}}>Select your card and challenge an opponent</p>
 
         {result && (
-          <div className="bg-green-900 border border-green-500 rounded-lg p-4 mb-6 text-center text-xl font-bold">
+          <div style={{background:'#14532d',border:'1px solid #16a34a',borderRadius:'8px',padding:'16px',marginBottom:'24px',textAlign:'center',fontSize:'20px',fontWeight:'bold'}}>
             {result}
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Your Cards */}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'32px'}}>
           <div>
-            <h3 className="text-xl font-bold mb-4 text-purple-400">Your Cards</h3>
+            <h3 style={{fontSize:'20px',fontWeight:'bold',marginBottom:'16px',color:'#a855f7'}}>Your Cards</h3>
             {cards.length === 0 ? (
-              <div className="text-center py-10 border border-purple-900 rounded-lg">
-                <p className="text-gray-400 mb-4">No cards! Mint some first.</p>
+              <div style={{textAlign:'center',padding:'40px',border:'1px solid #4a1d96',borderRadius:'8px'}}>
+                <p style={{color:'#9ca3af',marginBottom:'16px'}}>No cards! Mint some first.</p>
                 <Link href="/mint">
-                  <button className="bg-purple-600 px-6 py-2 rounded-lg">Mint Cards</button>
+                  <button style={{background:'#7c3aed',color:'#fff',padding:'8px 24px',borderRadius:'8px',border:'none',cursor:'pointer'}}>
+                    Mint Cards
+                  </button>
                 </Link>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
                 {cards.map((card, i) => (
                   <div
                     key={i}
-                    onClick={() => setSelectedCard(card)}
-                    className={`p-4 rounded-lg border cursor-pointer transition ${
-                      selectedCard?.name === card.name
-                        ? 'border-purple-400 bg-purple-900'
-                        : 'border-gray-700 bg-gray-900 hover:border-purple-700'
-                    }`}
+                    onClick={() => setSelected(card)}
+                    style={{padding:'16px',borderRadius:'8px',border: selected && selected.name === card.name ? '2px solid #a855f7' : '1px solid #374151',background: selected && selected.name === card.name ? '#4a1d96' : '#111827',cursor:'pointer',display:'flex',alignItems:'center',gap:'12px'}}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-3xl">{card.emoji}</span>
-                      <div>
-                        <p className="font-bold">{card.name}</p>
-                        <p className="text-sm text-gray-400">ATK {card.attack} | DEF {card.defense}</p>
-                      </div>
-                      {selectedCard?.name === card.name && (
-                        <span className="ml-auto text-purple-400">✓ Selected</span>
-                      )}
+                    <span style={{fontSize:'32px'}}>{card.emoji}</span>
+                    <div style={{flex:1}}>
+                      <p style={{fontWeight:'bold'}}>{card.name}</p>
+                      <p style={{fontSize:'14px',color:'#9ca3af'}}>ATK {card.attack} | DEF {card.defense}</p>
                     </div>
+                    {selected && selected.name === card.name && (
+                      <span style={{color:'#a855f7',fontWeight:'bold'}}>Selected</span>
+                    )}
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Opponents */}
           <div>
-            <h3 className="text-xl font-bold mb-4 text-red-400">Opponents</h3>
-            <div className="space-y-3">
+            <h3 style={{fontSize:'20px',fontWeight:'bold',marginBottom:'16px',color:'#ef4444'}}>Opponents</h3>
+            <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
               {OPPONENTS.map((opp, i) => (
-                <div key={i} className="p-4 rounded-lg border border-gray-700 bg-gray-900">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">{opp.emoji}</span>
-                    <div className="flex-1">
-                      <p className="font-bold">{opp.name}</p>
-                      <p className="text-sm text-gray-400">ATK {opp.attack} | DEF {opp.defense}</p>
-                    </div>
-                    <button
-                      onClick={() => battle(opp)}
-                      disabled={!selectedCard || battling}
-                      className="bg-red-700 hover:bg-red-600 disabled:bg-gray-700 disabled:cursor-not-allowed px-4 py-2 rounded-lg font-bold"
-                    >
-                      {battling ? '⚔️...' : 'Fight!'}
-                    </button>
+                <div key={i} style={{padding:'16px',borderRadius:'8px',border:'1px solid #374151',background:'#111827',display:'flex',alignItems:'center',gap:'12px'}}>
+                  <span style={{fontSize:'32px'}}>{opp.emoji}</span>
+                  <div style={{flex:1}}>
+                    <p style={{fontWeight:'bold'}}>{opp.name}</p>
+                    <p style={{fontSize:'14px',color:'#9ca3af'}}>ATK {opp.attack} | DEF {opp.defense}</p>
                   </div>
+                  <button
+                    onClick={() => battle(opp)}
+                    disabled={!selected || battling}
+                    style={{background: selected && !battling ? '#dc2626' : '#374151',color:'#fff',padding:'8px 16px',borderRadius:'8px',fontWeight:'bold',border:'none',cursor: selected && !battling ? 'pointer' : 'not-allowed'}}
+                  >
+                    {battling ? '...' : 'Fight!'}
+                  </button>
                 </div>
               ))}
             </div>
@@ -157,5 +134,5 @@ export default function Battle() {
         </div>
       </div>
     </div>
-  );
+  )
 }
