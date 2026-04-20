@@ -1,83 +1,72 @@
-import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useWallet } from '@solana/wallet-adapter-react'
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 export default function Collection() {
-  const { connected } = useWallet();
-  const [cards, setCards] = useState<any[]>([]);
+  const { connected } = useWallet()
+  const [cards, setCards] = useState([])
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('myCards') || '[]');
-    setCards(saved);
-  }, []);
+    const saved = JSON.parse(localStorage.getItem('myCards') || '[]')
+    setCards(saved)
+  }, [])
 
-  const rarityLabel = (r: number) => {
-    if (r === 3) return 'Legendary';
-    if (r === 2) return 'Rare';
-    return 'Common';
-  };
-
-  const explorerLink = (tx: string) => {
-    return 'https://explorer.solana.com/tx/' + tx + '?cluster=devnet';
-  };
+  const rarityLabel = (r) => r === 3 ? 'Legendary' : r === 2 ? 'Rare' : 'Common'
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <nav className="flex justify-between items-center px-8 py-4 border-b border-purple-900">
-        <Link href="/" className="text-2xl font-bold text-purple-400">NFT Arena</Link>
-        <div className="flex gap-6 items-center">
-          <Link href="/mint" className="hover:text-purple-400">Mint</Link>
-          <Link href="/collection" className="text-purple-400">Collection</Link>
-          <Link href="/battle" className="hover:text-purple-400">Battle</Link>
+    <div style={{minHeight:'100vh',background:'#000',color:'#fff',fontFamily:'sans-serif'}}>
+      <nav style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'16px 32px',borderBottom:'1px solid #4a1d96'}}>
+        <Link href="/" style={{color:'#a855f7',fontSize:'24px',fontWeight:'bold',textDecoration:'none'}}>NFT Arena</Link>
+        <div style={{display:'flex',gap:'24px',alignItems:'center'}}>
+          <Link href="/mint" style={{color:'#fff',textDecoration:'none'}}>Mint</Link>
+          <Link href="/collection" style={{color:'#a855f7',textDecoration:'none'}}>Collection</Link>
+          <Link href="/battle" style={{color:'#fff',textDecoration:'none'}}>Battle</Link>
           <WalletMultiButton />
         </div>
       </nav>
-
-      <div className="max-w-6xl mx-auto px-8 py-12">
-        <h2 className="text-4xl font-bold mb-2">My Collection</h2>
-        <p className="text-gray-400 mb-8">Your minted NFT cards on Solana devnet</p>
+      <div style={{maxWidth:'1200px',margin:'0 auto',padding:'48px 32px'}}>
+        <h2 style={{fontSize:'36px',fontWeight:'bold',marginBottom:'8px'}}>My Collection</h2>
+        <p style={{color:'#9ca3af',marginBottom:'32px'}}>Your minted NFT cards on Solana devnet</p>
 
         {!connected && (
-          <div className="bg-purple-900 border border-purple-600 rounded-lg p-6 mb-8 text-center">
-            <p className="mb-4">Connect your wallet to view your collection</p>
+          <div style={{background:'#4a1d96',border:'1px solid #7c3aed',borderRadius:'8px',padding:'24px',marginBottom:'32px',textAlign:'center'}}>
+            <p style={{marginBottom:'16px'}}>Connect your wallet to view your collection</p>
             <WalletMultiButton />
           </div>
         )}
 
         {connected && cards.length === 0 && (
-          <div className="text-center py-20">
-            <p className="text-xl text-gray-400 mb-6">No cards yet! Go mint some.</p>
+          <div style={{textAlign:'center',padding:'80px 0'}}>
+            <p style={{fontSize:'20px',color:'#9ca3af',marginBottom:'24px'}}>No cards yet! Go mint some.</p>
             <Link href="/mint">
-              <button className="bg-purple-600 hover:bg-purple-700 px-8 py-3 rounded-lg font-bold">
+              <button style={{background:'#7c3aed',color:'#fff',padding:'12px 32px',borderRadius:'8px',fontWeight:'bold',border:'none',cursor:'pointer'}}>
                 Mint Your First Card
               </button>
             </Link>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:'24px'}}>
           {cards.map((card, i) => (
-            <div key={i} className="bg-gray-900 border border-purple-800 rounded-xl p-6">
-              <div className="text-5xl text-center mb-3">{card.emoji}</div>
-              <h3 className="text-xl font-bold text-center mb-1">{card.name}</h3>
-              <p className="text-center text-sm mb-3">{rarityLabel(card.rarity)}</p>
-              <div className="flex justify-between mb-3">
-                <div className="text-center">
-                  <p className="text-red-400 font-bold">{card.attack}</p>
-                  <p className="text-gray-500 text-xs">ATK</p>
+            <div key={i} style={{background:'#111827',border:'1px solid #4a1d96',borderRadius:'12px',padding:'24px'}}>
+              <div style={{fontSize:'48px',textAlign:'center',marginBottom:'12px'}}>{card.emoji}</div>
+              <h3 style={{fontSize:'20px',fontWeight:'bold',textAlign:'center',marginBottom:'4px'}}>{card.name}</h3>
+              <p style={{textAlign:'center',fontSize:'14px',marginBottom:'12px',color:'#d1d5db'}}>{rarityLabel(card.rarity)}</p>
+              <div style={{display:'flex',justifyContent:'space-around',marginBottom:'12px'}}>
+                <div style={{textAlign:'center'}}>
+                  <p style={{color:'#f87171',fontWeight:'bold'}}>{card.attack}</p>
+                  <p style={{color:'#6b7280',fontSize:'12px'}}>ATK</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-blue-400 font-bold">{card.defense}</p>
-                  <p className="text-gray-500 text-xs">DEF</p>
+                <div style={{textAlign:'center'}}>
+                  <p style={{color:'#60a5fa',fontWeight:'bold'}}>{card.defense}</p>
+                  <p style={{color:'#6b7280',fontSize:'12px'}}>DEF</p>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 truncate mb-1">
-                {card.pda}
-              </p>
+              <p style={{fontSize:'11px',color:'#6b7280',wordBreak:'break-all',marginBottom:'8px'}}>{card.pda}</p>
               <button
-                onClick={() => window.open(explorerLink(card.tx), '_blank')}
-                className="text-xs text-purple-400 hover:underline bg-transparent border-0 cursor-pointer p-0"
+                onClick={() => window.open('https://explorer.solana.com/tx/' + card.tx + '?cluster=devnet', '_blank')}
+                style={{background:'transparent',color:'#a855f7',border:'none',cursor:'pointer',fontSize:'12px',padding:'0'}}
               >
                 View on Explorer
               </button>
@@ -86,5 +75,5 @@ export default function Collection() {
         </div>
       </div>
     </div>
-  );
+  )
 }
